@@ -1,0 +1,44 @@
+=AMQPLogging
+
+
+A ruby logger class that logs to an {AMQP}[http://www.amqp.org/] exchange in addition to your default log device.
+
+==Basic Configuration
+By default the logs are routed to the host, exchange and key specified in DEFAULT_OPTIONS.
+You can change the configuration when creating the logger object by specifying an argument hash:
+
+	require 'amqp_logging'
+
+	logging_config = { :routing_key => "applogging",
+	                   :host => AppConfig.amqp_logging.host,
+	                   :exchange => AppConfig.amqp_logging.exchange }
+
+	logger = AMQPLogging::Logger.new(config.log_path, logging_config)
+	config.logger = logger
+
+==Routing Keys
+
+You can set the routing key with a string or use a generator that respondes to call,
+receives the logline as the first argument and returns the routing key.
+
+Example:
+
+	# You can use a lambda or whatever responds to #call as the routing key generator
+	AMQPRoutingKeyGenerator = lambda do |logline|
+	  if logline =~ /(?:engine\[([^\]]*)\])\: (Completed in|Processing|Session ID)?/
+	    key = "logs.app.#{$1}"
+	    key << ".statistics" unless $2.nil?
+	  else
+	    key = "logs.app.system"
+	  end
+	  key
+	end
+
+	AMQPLogging::Logger.new($stdout, :routing_key => AMQPRoutingKeyGenerator)
+
+==License
+
+Copyright © 2010 Pascal Friederich
+Copyright © 2010 XING AG
+
+See LICENSES for details.
