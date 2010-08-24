@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name    = "amqp_logging"
-  s.version = "0.4.3"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = ">= 1.3.1"
   s.authors                   = ["Pascal Friederich"]
