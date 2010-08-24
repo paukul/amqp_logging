@@ -15,6 +15,10 @@ You can change the configuration when creating the logger object by specifying a
 
 	logger = AMQPLogging::Logger.new(config.log_path, logging_config)
 	config.logger = logger
+	
+With Rails 3 you will need to modify this a bit, as config.log_path no longer has the desired effect:
+
+	config.logger = AMQPLogging::Logger.new(config.paths.log.to_a.first, logging_config)
 
 ==Routing Keys
 

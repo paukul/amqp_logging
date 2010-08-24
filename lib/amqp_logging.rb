@@ -1,5 +1,6 @@
 require 'bunny'
 require 'active_support'
+require 'active_support/time'
 
 module AMQPLogging
 
@@ -75,7 +76,7 @@ module AMQPLogging
       end
 
       def bunny
-        @bunny ||= Bunny.new(:host => @configuration[:host])
+        @bunny ||= Bunny.new(:host => configuration[:host])
         @bunny
       end
   end

@@ -5,13 +5,13 @@
 
 Gem::Specification.new do |s|
   s.name    = "amqp_logging"
-  s.version = "0.3.0"
+  s.version = "0.4.3"
 
   s.required_rubygems_version = ">= 1.3.1"
   s.authors                   = ["Pascal Friederich"]
   s.date                      = "2010-08-11"
   s.email                     = ["pascal.friederich@xing.com"]
-  s.extra_rdoc_files          = ["README.rdoc"]
+  s.extra_rdoc_files          = ["Readme.rdoc"]
   s.files                     = Dir['lib/**/*.rb']
   s.homepage                  = "http://github.com/paukul/amqp_logging"
   s.rdoc_options              = ["--charset=UTF-8"]
@@ -25,4 +25,3 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency("activesupport",         [">= 2.3.0"])
   s.add_development_dependency("mocha",             [">= 0"])
 end
-
