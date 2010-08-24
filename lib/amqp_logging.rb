@@ -1,6 +1,10 @@
 require 'bunny'
-require 'active_support'
-require 'active_support/time'
+
+begin
+  require 'active_support/time' # ActiveSupport 3.x
+rescue LoadError
+  require 'active_support'      # ActiveSupport 2.x
+end
 
 module AMQPLogging
 
@@ -43,6 +47,7 @@ module AMQPLogging
           exchange.publish(msg, :key => routing_key)
         end
       rescue Exception => exception
+        reraise_expectation_errors!
         pause_amqp_logging(exception)
       ensure
         @fallback_logdev.write(msg)
@@ -79,7 +84,16 @@ module AMQPLogging
         @bunny ||= Bunny.new(:host => configuration[:host])
         @bunny
       end
-  end
 
+      if defined?(Mocha)
+        def reraise_expectation_errors! #:nodoc:
+          raise if $!.is_a?(Mocha::ExpectationError)
+        end
+      else
+        def reraise_expectation_errors! #:nodoc:
+          # noop
+        end
+      end
+  end
 end
 

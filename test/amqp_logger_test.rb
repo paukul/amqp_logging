@@ -73,23 +73,24 @@ class TheLogDeviceTest < Test::Unit::TestCase
     config = { :queue => "testqueue", :exchange => "testexchange", :host => "testhost", :shift_age => 4, :shift_size => 1338 }
     bunny_stub = stub_everything("bunny_stub")
     Bunny.expects(:new).with(:host => "testhost").returns(bunny_stub)
-    bunny_stub.expects(:exchange).with(config[:exchange], :type => :topic).returns(stub("exchange stub"))
+    bunny_stub.expects(:exchange).with(config[:exchange], :type => :topic).returns(stub("exchange stub", :publish => true))
 
     logger = AMQPLogging::Logger.new(StringIO.new, config)
     logger.debug("foobar")
   end
 
   test "should publish the messages with the default routing key" do
+    message = "some stuff to log"
     exchange = mock()
-    exchange.expects(:publish).with("msg\n", :key => "a_routing_key")
+    exchange.expects(:publish).with(anything, :key => "a_routing_key")
     AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(exchange)
-    AMQPLogging::Logger.new(StringIO.new, {:routing_key => "a_routing_key"}).debug("msg")
+    AMQPLogging::Logger.new(StringIO.new, {:routing_key => "a_routing_key"}).debug(message)
   end
 
-  test "should take a proc argument to generate the routing key" do
-    key_generator = lambda {|msg| msg == "a message\n" }
+  test "should take a proc argument which gets the logline passed to generate the routing key" do
+    key_generator = lambda {|msg| !!(msg =~ /a message/) }
     exchange = mock()
-    exchange.expects(:publish).with("a message\n", :key => "true")
+    exchange.expects(:publish).with(anything, :key => "true")
     AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(exchange)
     AMQPLogging::Logger.new(StringIO.new, {:routing_key => key_generator}).debug("a message")
   end
