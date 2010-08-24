@@ -72,7 +72,7 @@ class TheLogDeviceTest < Test::Unit::TestCase
   test "should initialize the AMQP components correctly" do
     config = { :queue => "testqueue", :exchange => "testexchange", :host => "testhost", :shift_age => 4, :shift_size => 1338 }
     bunny_stub = stub_everything("bunny_stub")
-    Bunny.expects(:new).with(:host => "testhost").returns(bunny_stub)
+    Bunny.expects(:new).with(config.merge({:routing_key => "logs"})).returns(bunny_stub)
     bunny_stub.expects(:exchange).with(config[:exchange], :type => :topic).returns(stub("exchange stub", :publish => true))
 
     logger = AMQPLogging::Logger.new(StringIO.new, config)
