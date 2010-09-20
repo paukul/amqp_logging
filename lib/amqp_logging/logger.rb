@@ -7,7 +7,6 @@ class AMQPLogging::Logger < ::Logger
     :queue        => "logging_queue",
     :routing_key  => "logs"
   }
-  RETRY_AFTER = 10.seconds
 
   attr_accessor :extra_attributes
   attr_accessor :errback

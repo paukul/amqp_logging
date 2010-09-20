@@ -1,4 +1,6 @@
 class AMQPLogging::LogDevice
+  RETRY_AFTER = 10.seconds
+
   attr_reader :exchange, :configuration
   attr_accessor :logger
 
