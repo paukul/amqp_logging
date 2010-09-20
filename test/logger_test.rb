@@ -14,13 +14,13 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
 
   test "should be instanciated with an amqp configuration hash" do
     config = { :queue => "testqueue", :exchange => "testexchange", :host => "testhost", :shift_age => 4, :shift_size => 1338, :routing_key => "foobar" }
-    AMQPLogging::AMQPLogDevice.expects(:new).with(anything, config).returns(stub_everything)
+    AMQPLogging::LogDevice.expects(:new).with(anything, config).returns(stub_everything)
 
     logger = AMQPLogging::Logger.new(@io, config)
   end
 
   test "should write to the default io" do
-    AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(stub_everything('test_exchange'))
+    AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(stub_everything('test_exchange'))
     logger = AMQPLogging::Logger.new(@io)
     logger.debug "logging something"
     assert_match "logging something", @io.string
@@ -32,8 +32,8 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
     class TestExchange; attr_reader :counter; def publish(*args); @counter ||= 0; @counter += 1; raise 'Foo'; end; end
     logger = AMQPLogging::Logger.new(@io)
     exchange = TestExchange.new
-    AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(exchange)
-    AMQPLogging::AMQPLogDevice.any_instance.stubs(:bunny).returns(stub_everything("bunny stub"))
+    AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(exchange)
+    AMQPLogging::LogDevice.any_instance.stubs(:bunny).returns(stub_everything("bunny stub"))
     2.times { logger.debug "This will raise" }
 
     assert_equal 1, exchange.counter
@@ -46,7 +46,7 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
     errback = lambda {|exception| begin raise exception; rescue FooBarException; @called = true; end}
     raising_exchange = mock("mocked exchange")
     raising_exchange.expects(:publish).raises(FooBarException)
-    AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(raising_exchange)
+    AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(raising_exchange)
     logger = AMQPLogging::Logger.new(@io)
     logger.errback = errback
 
@@ -59,10 +59,10 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
   test "should reset the bunny and exchange instance if a exception occures" do
     raising_exchange = mock("mocked exchange")
     raising_exchange.expects(:publish).raises("FFFFFFFFUUUUUUUUUU")
-    AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(raising_exchange)
+    AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(raising_exchange)
     logger = AMQPLogging::Logger.new(@io)
 
-    AMQPLogging::AMQPLogDevice.any_instance.expects(:reset_amqp)
+    AMQPLogging::LogDevice.any_instance.expects(:reset_amqp)
     logger.debug("This will raise and send a notification")
   end
 
@@ -83,7 +83,7 @@ class TheLogDeviceTest < Test::Unit::TestCase
     message = "some stuff to log"
     exchange = mock()
     exchange.expects(:publish).with(anything, :key => "a_routing_key")
-    AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(exchange)
+    AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(exchange)
     AMQPLogging::Logger.new(StringIO.new, {:routing_key => "a_routing_key"}).debug(message)
   end
 
@@ -91,7 +91,7 @@ class TheLogDeviceTest < Test::Unit::TestCase
     key_generator = lambda {|msg| !!(msg =~ /a message/) }
     exchange = mock()
     exchange.expects(:publish).with(anything, :key => "true")
-    AMQPLogging::AMQPLogDevice.any_instance.stubs(:exchange).returns(exchange)
+    AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(exchange)
     AMQPLogging::Logger.new(StringIO.new, {:routing_key => key_generator}).debug("a message")
   end
 end
