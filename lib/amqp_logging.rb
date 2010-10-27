@@ -7,6 +7,7 @@ rescue LoadError
 end
 
 module AMQPLogging
+  autoload :BufferedJSONLogger, 'amqp_logging/buffered_json_logger'
 end
 
 require 'amqp_logging/logger'
