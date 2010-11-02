@@ -1,5 +1,4 @@
 require File.dirname(__FILE__) + '/test_helper.rb'
-require 'json'
 
 module AMQPLogging
   class TheBufferedJSONLoggerTest < Test::Unit::TestCase
@@ -51,9 +50,9 @@ module AMQPLogging
       assert @json["lines"].instance_of?(Array)
       assert_equal 3, @json["lines"].size
     end
-    
+
     test "should have each logline with severity, a timestamp and the message" do
-      severity, timestamp, message = @json["lines"][0]
+      severity, timestamp, message = @json["lines"][2]
       assert_equal Logger::DEBUG, severity
       assert_nothing_raised { Time.parse(timestamp) }
       assert_equal "foo", message

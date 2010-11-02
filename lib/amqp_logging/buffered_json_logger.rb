@@ -1,15 +1,8 @@
+require 'json'
+
+
 # in der rails app
 module AMQPLogging
-  module RailsRequestInfoLogging
-    # find the right method for this foobar
-    def log_processing_for_request_id
-      logger.add_field(:page, "#{controller_name}##{action_name}")
-      logger.add_field(:page, "#{controller_name}##{action_name}")
-      # TODO: ...
-      super
-    end
-  end
-
   module SimpleFormatter
     def self.call(severity, time, progname, msg)
       msg
@@ -34,6 +27,10 @@ module AMQPLogging
     def add_field(name, value)
       @fields[name] = value
     end
+    
+    def add_fields(extra_fields)
+      @fields.merge!(extra_fields)
+    end
 
     def add(severity, message = nil, progname = nil, &block)
       severity ||= UNKNOWN
@@ -50,7 +47,7 @@ module AMQPLogging
         end
       end
       t = Time.now
-      formatted_message = format_message(format_severity(severity), t, progname, message)
+      formatted_message = format_message(format_severity(severity), t, progname, message).strip
       @buffer << [severity, t.strftime("%d.%m.%YT%H:%M:%S.#{t.usec}"), formatted_message]
       true
     end
@@ -65,9 +62,10 @@ module AMQPLogging
     private
     def format_json
       @default_fields.merge({
-        :lines => @buffer,
+        :lines => @buffer.reverse,
         :severity => @buffer.map {|l| l[0]}.max
-      }).to_json
+      }).merge(@fields).to_json + "\n"
     end
+
   end
 end
