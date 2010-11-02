@@ -2,3 +2,4 @@
 .rvmrc
 Gemfile.lock
 *.gem
+.DS_Store
