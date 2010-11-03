@@ -46,7 +46,9 @@ class AMQPLogging::LogDevice
 
     def exchange
       bunny.start unless bunny.connected?
-      @exchange ||= bunny.exchange(configuration[:exchange], :type => :topic)
+      @exchange ||= bunny.exchange(configuration[:exchange], :durable => configuration[:exchange_durable],
+                                                             :auto_delete => configuration[:exchange_auto_delete],
+                                                             :type => configuration[:exchange_type])
     end
 
     def bunny

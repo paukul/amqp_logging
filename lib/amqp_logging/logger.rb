@@ -6,6 +6,9 @@ class AMQPLogging::Logger < ::Logger
     :exchange     => "logging_exchange",
     :queue        => "logging_queue",
     :routing_key  => "logs"
+    :exchange_durable     => true,
+    :exchange_auto_delete => false,
+    :exchange_type        => :topic,
   }
 
   attr_accessor :extra_attributes
