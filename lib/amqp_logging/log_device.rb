@@ -58,7 +58,7 @@ class AMQPLogging::LogDevice
     end
 
     def bunny
-      @bunny ||= Bunny.new(configuration)
+      @bunny ||= Bunny.new(configuration.slice(:host, :port, :user, :pass))
       @bunny
     end
 

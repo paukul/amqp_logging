@@ -13,7 +13,7 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
   end
 
   test "should be instanciated with an amqp configuration hash" do
-    config = { :queue => "testqueue", :exchange => "testexchange", :host => "testhost", :shift_age => 4, :shift_size => 1338, :routing_key => "foobar" }
+    config = { :queue => "testqueue", :exchange => "testexchange", :host => "testhost", :shift_age => 4, :shift_size => 1338, :routing_key => "foobar", :exchange_durable => true, :exchange_auto_delete => false, :exchange_type => :topic }
     AMQPLogging::LogDevice.expects(:new).with(anything, config).returns(stub_everything)
 
     logger = AMQPLogging::Logger.new(@io, config)
@@ -72,8 +72,10 @@ class TheLogDeviceTest < Test::Unit::TestCase
   test "should initialize the AMQP components correctly" do
     config = { :queue => "testqueue", :exchange => "testexchange", :host => "testhost", :shift_age => 4, :shift_size => 1338 }
     bunny_stub = stub_everything("bunny_stub")
-    Bunny.expects(:new).with(config.merge({:routing_key => "logs"})).returns(bunny_stub)
-    bunny_stub.expects(:exchange).with(config[:exchange], :type => :topic).returns(stub("exchange stub", :publish => true))
+    Bunny.expects(:new).with(:host => "testhost").returns(bunny_stub)
+    bunny_stub.expects(:exchange).with(config[:exchange], :durable     => true,
+                                                          :auto_delete => false,
+                                                          :type        => :topic).returns(stub("exchange stub", :publish => true))
 
     logger = AMQPLogging::Logger.new(StringIO.new, config)
     logger.debug("foobar")

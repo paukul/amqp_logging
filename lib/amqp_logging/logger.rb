@@ -5,7 +5,7 @@ class AMQPLogging::Logger < ::Logger
     :host         => "localhost",
     :exchange     => "logging_exchange",
     :queue        => "logging_queue",
-    :routing_key  => "logs"
+    :routing_key  => "logs",
     :exchange_durable     => true,
     :exchange_auto_delete => false,
     :exchange_type        => :topic,

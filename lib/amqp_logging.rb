@@ -1,7 +1,9 @@
 require 'bunny'
 
 begin
-  require 'active_support/time' # ActiveSupport 3.x
+  # ActiveSupport 3.x
+  require 'active_support/time'
+  require 'active_support/core_ext/hash/slice'
 rescue LoadError
   require 'active_support'      # ActiveSupport 2.x
 end
