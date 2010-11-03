@@ -1,7 +1,7 @@
 class AMQPLogging::LogDevice
   RETRY_AFTER = 10.seconds
 
-  attr_reader :exchange, :configuration
+  attr_reader   :exchange, :configuration
   attr_accessor :logger
 
   def initialize(dev, opts = {})
@@ -24,7 +24,13 @@ class AMQPLogging::LogDevice
   end
 
   def close
+    reset_amqp # TODO: Test!
     @fallback_logdev.close
+  end
+
+  def fallback_logdev=(io)
+    @fallback_logdev.close # TODO: Test!
+    @fallback_logdev = io
   end
 
   private

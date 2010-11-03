@@ -20,4 +20,9 @@ class AMQPLogging::Logger < ::Logger
     @logdev = AMQPLogging::LogDevice.new(@logdev, options)
     @logdev.logger = self
   end
+  
+  def fallback_logdev=(io)
+    @logdev.fallback_logdev = io
+  end
+  alias :logdev= :fallback_logdev=
 end
