@@ -14,3 +14,5 @@ end
 class Test::Unit::TestCase
   extend ActiveSupport::Testing::Declarative
 end
+
+require 'amqp_logging'
