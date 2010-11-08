@@ -13,14 +13,15 @@ module AMQPLogging
             request_headers[k] = "#<#{v.class.name}>"
           end
         end
-
-        ActionController::Base.logger.add_fields({
+        agent = ActionController::Base.logger.agent
+        agent.fields.merge!({
           :env => RAILS_ENV,
           :response_code    => response.status,
           :request_params   => request.request_parameters,
           :request_headers  => request_headers,
           :response_headers => response.headers
         })
+        agent.flush
       end
     end
   end
