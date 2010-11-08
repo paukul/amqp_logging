@@ -40,51 +40,6 @@ Example:
 
    AMQPLogging::Logger.new($stdout, :routing_key => AMQPRoutingKeyGenerator)
 
-==Buffered JSON Logging
-
-You can also use the BufferedJSONLogger which will buffer all the loglines of a request and
-send one JSON string after dispatching and handling the request has taken place.
-This will happen right after the dispatcher has passed the request to the controller and the
-controller has finished processing the request. All before, after and around filters
-will have run, and even if the filter chain was halted, the logger will be flushed correctly.
-
-The output will basically look like the following example:
-
-    {
-      "page":"FooController#index", // Controller and action
-      "severity":1,                 // the highest severity over all logged lines
-      "lines":[                     // the list of loglines in the format 'severity', 'timestamp', 'logline'
-        [1,"02.11.2010T17:49:42.475422","Processing FooController#index (for 127.0.0.1 at 2010-11-02 17:49:42) [GET]"]
-        [1,"02.11.2010T17:49:42.477404","Completed in 2ms (View: 0, DB: 0) | 200 OK [http://localhost/foo]"]
-      ],
-      "process":24785,              // the process id
-      "host":"pc-pfriederich"       // the hostname
-      "custom_field_1":"foobar"     // whatever custom fields you add
-      "benchmarks": {               // another custom field, for example added by timebandits (http://http://github.com/skaes/time_bandits)
-        "sql_queries":197,
-        "total":2120,
-        "gc_time":22.4,
-        "memcache_hits":4
-      }
-    }
-
-The BufferedJSONLogger is especially usefull when you plan to process the logs afterwards.
-Let's say you have 20 or more application servers which all log via AMQP, and you want to have some
-aggregated processing of the logs, request wise, it would be a pain in the ass to identify which logline
-belongs to which request. You can also add all kinds of data to the JSON object that will get logged in
-the end, so you don't have to figure that out afterwards by regexp parsing the loglines.
-For most users, this feature won't be that interesting I guess.
-
-If you want to use the Buffered logger, require 'amqp_logging/buffered_json_logger/rails' in your environment.rb
-and set the logger to an instance of AMQPLogging::BufferedJSONLogger.new. That's all.
-
-    require 'amqp_logging/buffered_json_logger/rails'
-
-    Rails::Initializer.run do |config|
-      logger = AMQPLogging::BufferedJSONLogger.new(config.log_path)
-      config.logger = logger
-      # ...whatever
-
 ==License
 
 Copyright © 2010 Pascal Friederich
