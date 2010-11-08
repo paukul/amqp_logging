@@ -10,6 +10,7 @@ end
 
 module AMQPLogging
   autoload :BufferedJSONLogger, 'amqp_logging/buffered_json_logger'
+  autoload :MetricsAgent, 'amqp_logging/metrics_agent'
 end
 
 require 'logger'
