@@ -27,6 +27,7 @@ module AMQPLogging
 
     def flush
       logger.info(@fields.to_json)
+      reset_fields
     end
 
     def [](fieldname)

@@ -8,35 +8,38 @@ module AMQPLogging
       @out = StringIO.new
       @agent.logger = Logger.new(@out)
     end
-    
+
     test "should record the process id" do
       assert_equal Process.pid, @agent[:pid]
     end
-    
+
     test "should record the hostname" do
       assert_equal Socket.gethostname.split('.').first, @agent[:host]
     end
-    
+
     test "should have convenience methods for accessing the fields" do
       @agent[:foo] = :bar
       assert_equal :bar, @agent[:foo]
       assert_equal @agent[:foo], @agent[:foo]
     end
-    
+
     test "should send the collected data as json when flushed" do
       @agent.flush
       json = JSON.parse(@out.string)
       assert_equal Process.pid, json["pid"]
     end
-    
+
     test "should reset the collected data when flushed" do
-      
+      @agent[:foo] = :bar
+      @agent.flush
+      assert_equal nil, @agent[:foo]
     end
   end
 
   class LoggingProxyTest < Test::Unit::TestCase
     def setup
       @agent = MetricsAgent.new
+      @agent.logger = ::Logger.new('/dev/null')
       @logger = ::Logger.new('/dev/null')
       @proxy = @agent.wrap_logger(@logger)
     end
@@ -74,12 +77,27 @@ module AMQPLogging
       assert_nothing_raised { Time.parse(timestamp) }
       assert_equal some_logline, message
     end
-    
+
     test "should allow to register multiple loggers with different types" do
       other_logger = ::Logger.new('/dev/null')
       @agent.wrap_logger(other_logger, :sql)
       other_logger.info("some fancy stuff here")
       assert_equal 1, @agent[:loglines][:sql].size
+    end
+
+    test "should reset the collected loglines when flushed" do
+      @proxy.debug "foo"
+      @agent.flush
+      assert_equal [], @agent[:loglines][:default]
+    end
+
+    test "should keep loglines fields for the registered loggers after flushing" do
+      other_logger = ::Logger.new('/dev/null')
+      @agent.wrap_logger(other_logger, :sql)
+      other_logger.info "foo"
+      @agent.flush
+
+      assert_equal [], @agent[:loglines][:sql]
     end
   end
 end
