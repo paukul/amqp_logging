@@ -45,17 +45,14 @@ module AMQPLogging
       @fields[:loglines][@logger_types[logger]] << [severity, t.strftime("%d.%m.%YT%H:%M:%S.#{t.usec}"), message || progname]
     end
 
-    def wrap_logger(logger, type=:default)
+    def wrap_logger(logger, type = :default)
       agent = self
       register_logger(logger, type)
       logger.instance_eval do
         @agent = agent
-        alias :add_without_proxy :add
-        def add_with_proxy(severity, message, progname)
-          @agent.add_logline(severity, message, progname, self) unless severity < @level
-          add_without_proxy(severity, message, progname)
+        class << self
+          include MetricsAgentSupport
         end
-        alias :add :add_with_proxy
       end
       logger
     end
@@ -70,6 +67,24 @@ module AMQPLogging
       @fields = {
       }.merge!(@default_fields)
       @logger_types.values.each {|logtype| @fields[:loglines][logtype] = []}
+    end
+    
+    module MetricsAgentSupport
+      def self.included(base)
+        base.class_eval do
+          alias :add_without_proxy :add
+          alias :add :add_with_proxy
+        end
+      end
+
+      def agent
+        @agent
+      end
+
+      def add_with_proxy(severity, message, progname)
+        @agent.add_logline(severity, message, progname, self) unless severity < @level
+        add_without_proxy(severity, message, progname)
+      end
     end
   end
 end
