@@ -3,6 +3,8 @@ require 'json'
 
 module AMQPLogging
   class MetricsAgent
+    attr_reader :fields
+
     def initialize
       @default_fields = {
         :host => Socket.gethostname.split('.').first,
