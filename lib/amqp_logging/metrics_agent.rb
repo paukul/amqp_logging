@@ -81,7 +81,7 @@ module AMQPLogging
         @agent
       end
 
-      def add_with_proxy(severity, message, progname)
+      def add_with_proxy(severity, message = nil, progname = nil)
         @agent.add_logline(severity, message, progname, self) unless severity < @level
         add_without_proxy(severity, message, progname)
       end
