@@ -26,7 +26,7 @@ module AMQPLogging
     end
 
     def flush
-      logger.info(@fields.to_json)
+      logger.info(@fields.to_json + "\n")
       reset_fields
     end
 
