@@ -42,7 +42,8 @@ module AMQPLogging
 
     def add_logline(severity, message, progname, logger)
       t = Time.now
-      @fields[:loglines][@logger_types[logger]] << [severity, t.strftime("%Y-%d-%mT%H:%M:%S.#{t.usec}"), message || progname]
+      msg = (message || progname).strip
+      @fields[:loglines][@logger_types[logger]] << [severity, t.strftime("%Y-%d-%mT%H:%M:%S.#{t.usec}"), msg]
     end
 
     def wrap_logger(logger, type = :default)

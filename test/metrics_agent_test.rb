@@ -99,5 +99,10 @@ module AMQPLogging
 
       assert_equal [], @agent[:loglines][:sql]
     end
+
+    test "should remove leading and trailing newlines from the stored loglines" do
+      @proxy.debug "\n\nfoo\n\n"
+      assert_equal "foo", @agent[:loglines][:default][-1][2]
+    end
   end
 end
