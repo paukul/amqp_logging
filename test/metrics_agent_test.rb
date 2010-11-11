@@ -6,7 +6,7 @@ module AMQPLogging
     def setup
       @agent = MetricsAgent.new
       @out = StringIO.new
-      @agent.logger = Logger.new(@out)
+      @agent.logger = ::Logger.new(@out)
     end
 
     test "should record the process id" do

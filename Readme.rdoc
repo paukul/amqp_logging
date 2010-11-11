@@ -1,7 +1,6 @@
 =AMQPLogging
 
-
-A ruby logger class that logs to an {AMQP}[http://www.amqp.org/] exchange in addition to your default log device.
+A ruby logger class that logs to an {AMQP}[http://www.amqp.org/] exchange
 
 ==Basic Configuration
 By default the logs are routed to the host, exchange and key specified in DEFAULT_OPTIONS.
@@ -13,12 +12,8 @@ You can change the configuration when creating the logger object by specifying a
                       :host => AppConfig.amqp_logging.host,
                       :exchange => AppConfig.amqp_logging.exchange }
 
-   logger = AMQPLogging::Logger.new(config.log_path, logging_config)
+   logger = AMQPLogging::Logger.new(logging_config)
    config.logger = logger
-   
-With Rails 3 you will need to modify this a bit, as config.log_path no longer has the desired effect:
-
-   config.logger = AMQPLogging::Logger.new(config.paths.log.to_a.first, logging_config)
 
 ==Routing Keys
 
@@ -39,6 +34,11 @@ Example:
    end
 
    AMQPLogging::Logger.new($stdout, :routing_key => AMQPRoutingKeyGenerator)
+
+==Fallback to disk
+
+The support for a fallback logdevice was removed with version 0.5.0. A multi logger thatallows
+you get the same behaviour will follow soonish.
 
 ==License
 
