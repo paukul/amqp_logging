@@ -6,31 +6,18 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
     @io = StringIO.new
   end
 
-  test "should be instanciated like a normal logger" do
-    assert_nothing_raised { AMQPLogging::Logger.new(@io) }
-    assert_nothing_raised { AMQPLogging::Logger.new(@io, 2) }
-    assert_nothing_raised { AMQPLogging::Logger.new(@io, 2, 1048576) }
-  end
-
   test "should be instanciated with an amqp configuration hash" do
     config = { :queue => "testqueue", :exchange => "testexchange", :host => "testhost", :shift_age => 4, :shift_size => 1338, :routing_key => "foobar", :exchange_durable => true, :exchange_auto_delete => false, :exchange_type => :topic }
-    AMQPLogging::LogDevice.expects(:new).with(anything, config).returns(stub_everything)
+    AMQPLogging::LogDevice.expects(:new).with(config).returns(stub_everything)
 
-    logger = AMQPLogging::Logger.new(@io, config)
-  end
-
-  test "should write to the default io" do
-    AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(stub_everything('test_exchange'))
-    logger = AMQPLogging::Logger.new(@io)
-    logger.debug "logging something"
-    assert_match "logging something", @io.string
+    logger = AMQPLogging::Logger.new(config)
   end
 
   test "should pause AMQP logging if exceptions during logging occure" do
     # in case you ask why not just using mocha expectations here: the rescue in the tested code also rescues the mocha exception
     # this fake exchange object increases a counter everytime publish is executed so we can check the number of executions
     class TestExchange; attr_reader :counter; def publish(*args); @counter ||= 0; @counter += 1; raise 'Foo'; end; end
-    logger = AMQPLogging::Logger.new(@io)
+    logger = AMQPLogging::Logger.new
     exchange = TestExchange.new
     AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(exchange)
     AMQPLogging::LogDevice.any_instance.stubs(:bunny).returns(stub_everything("bunny stub"))
@@ -47,7 +34,7 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
     raising_exchange = mock("mocked exchange")
     raising_exchange.expects(:publish).raises(FooBarException)
     AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(raising_exchange)
-    logger = AMQPLogging::Logger.new(@io)
+    logger = AMQPLogging::Logger.new
     logger.errback = errback
 
     assert_nothing_raised do
@@ -60,7 +47,7 @@ class TheAMQPLoggerTest < Test::Unit::TestCase
     raising_exchange = mock("mocked exchange")
     raising_exchange.expects(:publish).raises("FFFFFFFFUUUUUUUUUU")
     AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(raising_exchange)
-    logger = AMQPLogging::Logger.new(@io)
+    logger = AMQPLogging::Logger.new
 
     AMQPLogging::LogDevice.any_instance.expects(:reset_amqp)
     logger.debug("This will raise and send a notification")
@@ -77,7 +64,7 @@ class TheLogDeviceTest < Test::Unit::TestCase
                                                           :auto_delete => false,
                                                           :type        => :topic).returns(stub("exchange stub", :publish => true))
 
-    logger = AMQPLogging::Logger.new(StringIO.new, config)
+    logger = AMQPLogging::Logger.new(config)
     logger.debug("foobar")
   end
 
@@ -86,7 +73,7 @@ class TheLogDeviceTest < Test::Unit::TestCase
     exchange = mock()
     exchange.expects(:publish).with(anything, :key => "a_routing_key")
     AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(exchange)
-    AMQPLogging::Logger.new(StringIO.new, {:routing_key => "a_routing_key"}).debug(message)
+    AMQPLogging::Logger.new(:routing_key => "a_routing_key").debug(message)
   end
 
   test "should take a proc argument which gets the logline passed to generate the routing key" do
@@ -94,7 +81,7 @@ class TheLogDeviceTest < Test::Unit::TestCase
     exchange = mock()
     exchange.expects(:publish).with(anything, :key => "true")
     AMQPLogging::LogDevice.any_instance.stubs(:exchange).returns(exchange)
-    AMQPLogging::Logger.new(StringIO.new, {:routing_key => key_generator}).debug("a message")
+    AMQPLogging::Logger.new(:routing_key => key_generator).debug("a message")
   end
 end
 

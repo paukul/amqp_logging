@@ -4,9 +4,8 @@ class AMQPLogging::LogDevice
   attr_reader   :exchange, :configuration
   attr_accessor :logger
 
-  def initialize(dev, opts = {})
+  def initialize(opts = {})
     @configuration = opts
-    @fallback_logdev = dev
   end
 
   def write(msg)
@@ -18,19 +17,11 @@ class AMQPLogging::LogDevice
     rescue Exception => exception
       reraise_expectation_errors!
       pause_amqp_logging(exception)
-    ensure
-      @fallback_logdev.write(msg)
     end
   end
 
   def close
     reset_amqp # TODO: Test!
-    @fallback_logdev.close
-  end
-
-  def fallback_logdev=(io)
-    @fallback_logdev.close # TODO: Test!
-    @fallback_logdev = io
   end
 
   private
