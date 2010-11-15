@@ -3,7 +3,9 @@ require 'json'
 
 module AMQPLogging
   class MetricsAgent
+    DEFAULT_MAX_LINES_PER_LOGGER = 50
     attr_reader :fields
+    attr_accessor :max_lines_per_logger
 
     def initialize
       @default_fields = {
@@ -13,6 +15,7 @@ module AMQPLogging
           :default => []
         }
       }
+      @max_lines_per_logger = DEFAULT_MAX_LINES_PER_LOGGER
       @logger_types = {}
       reset_fields
     end
@@ -42,8 +45,19 @@ module AMQPLogging
 
     def add_logline(severity, message, progname, logger)
       t = Time.now
-      msg = (message || progname).strip
-      @fields[:loglines][@logger_types[logger]] << [severity, t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec}"), msg]
+      timestring = t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec}")
+      logtype = @logger_types[logger]
+      lines = @fields[:loglines][logtype]
+      if !@truncated_status[logtype] && lines.size < @max_lines_per_logger
+        msg = (message || progname).strip
+        lines << [severity, timestring, msg]
+        true
+      else
+        msg = "Loglines truncated to #{@max_lines_per_logger} lines (MetricsAgent#max_lines_per_logger)"
+        lines[-1] = [Logger::INFO, timestring, msg]
+        @truncated_status[logtype] = true
+        false
+      end
     end
 
     def wrap_logger(logger, type = :default)
@@ -72,6 +86,7 @@ module AMQPLogging
       @fields = {
       }.merge!(@default_fields)
       @logger_types.values.each {|logtype| @fields[:loglines][logtype] = []}
+      @truncated_status = {}
     end
     
     module MetricsAgentSupport

@@ -119,5 +119,22 @@ module AMQPLogging
       @proxy.debug "\n\nfoo\n\n"
       assert_equal "foo", @agent[:loglines][:default][-1][2]
     end
+
+    test "should have a limit of loglines per logger after which they will get ignored" do
+      @agent.max_lines_per_logger = 2
+      @logger.debug "foo"
+      @logger.debug "bar"
+      no_lines_before = @agent[:loglines][:default].size
+      @logger.debug "baz"
+      assert_equal no_lines_before, @agent[:loglines][:default].size
+    end
+
+    test "should replace the last logged line with a truncation note if the limit of loglines is exceeded" do
+      @agent.max_lines_per_logger = 1
+      @logger.debug "foo"
+      assert_equal "foo", @agent[:loglines][:default].last[2]
+      @logger.debug "bar"
+      assert_match /truncated/, @agent[:loglines][:default].last[2]
+    end
   end
 end
