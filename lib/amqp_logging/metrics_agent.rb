@@ -35,7 +35,6 @@ module AMQPLogging
     end
 
     def flush
-      puts "flushing #{self.object_id}"
       logger.info(@fields.to_json + "\n")
       reset_fields
     end
@@ -51,7 +50,7 @@ module AMQPLogging
     def add_logline(severity, message, progname, logger)
       t = Time.now
       msg = (message || progname).strip
-      @fields[:loglines][@logger_types[logger]] << [severity, t.strftime("%Y-%d-%mT%H:%M:%S.#{t.usec}"), msg]
+      @fields[:loglines][@logger_types[logger]] << [severity, t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec}"), msg]
     end
 
     def wrap_logger(logger, type = :default)
