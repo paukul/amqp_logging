@@ -34,6 +34,21 @@ module AMQPLogging
       @agent.flush
       assert_equal nil, @agent[:foo]
     end
+
+    test "should keep track if the agents data is dirty" do
+      assert !@agent.dirty?
+
+      @agent[:foo] = :bar
+      assert @agent.dirty?
+    end
+
+    test "flushing should reset dirty status" do
+      @agent[:foo] = :bar
+      assert @agent.dirty?
+
+      @agent.flush
+      assert !@agent.dirty?
+    end
   end
 
   class LoggingProxyTest < Test::Unit::TestCase

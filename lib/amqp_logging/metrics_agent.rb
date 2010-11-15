@@ -65,6 +65,10 @@ module AMQPLogging
       logger
     end
 
+    def dirty?
+      @fields != @default_fields
+    end
+
     private
     def self.flush_all_instances
       @@instances.each {|i| i.flush }
