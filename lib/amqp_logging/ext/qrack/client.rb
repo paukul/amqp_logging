@@ -1,7 +1,7 @@
 require 'qrack/client'
 
 
-unless Qrack::Client.instance_methods.include?(:socket_with_reliable_timeout)
+unless Qrack::Client.instance_methods.include?("socket_with_reliable_timeout")
   module AMQPLogging
     Timer = if RUBY_VERSION < "1.9"
               begin
