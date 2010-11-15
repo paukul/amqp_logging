@@ -3,7 +3,7 @@ require 'json'
 
 module AMQPLogging
   class MetricsAgent
-    DEFAULT_MAX_LINES_PER_LOGGER = 50
+    DEFAULT_MAX_LINES_PER_LOGGER = 1000
     attr_reader :fields
     attr_accessor :max_lines_per_logger
 
