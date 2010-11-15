@@ -20,6 +20,21 @@ Gem::Specification.new do |s|
   s.summary                   = "A ruby logger class that logs to an AMQP exchange in addition to your default log device."
   s.test_files                = Dir['test/**/*.rb']
 
+  s.post_install_message = <<-INFO
+  *********************************************************************************************
+
+    If you're running a ruby version < 1.9 please install the system_timer gem because rubys 
+    default timeout.rb isn't reliable.
+
+    "In particular, it is guaranteed to not work in Ruby M.R.I 1.8 when you are issuing 
+     system calls that can cause your Ruby process to sleep for a period of time that is 
+     longer than your timeout."
+
+    See: http://ph7spot.com/musings/system-timer
+
+  *********************************************************************************************
+  INFO
+
   s.specification_version     = 3
   s.add_runtime_dependency("bunny",                 [">= 0.6.0"])
   s.add_runtime_dependency("activesupport",         [">= 2.3.0"])
