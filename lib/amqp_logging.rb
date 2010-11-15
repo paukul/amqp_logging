@@ -10,6 +10,11 @@ end
 
 module AMQPLogging
   autoload :MetricsAgent, 'amqp_logging/metrics_agent'
+
+  private
+  def self.iso_time_with_nanoseconds(t = Time.now)
+    t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec}")
+  end
 end
 
 require 'logger'

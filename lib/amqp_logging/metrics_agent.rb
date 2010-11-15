@@ -44,8 +44,7 @@ module AMQPLogging
     end
 
     def add_logline(severity, message, progname, logger)
-      t = Time.now
-      timestring = t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec}")
+      timestring = AMQPLogging.iso_time_with_nanoseconds
       logtype = @logger_types[logger]
       lines = @fields[:loglines][logtype]
       if !@truncated_status[logtype] && lines.size < @max_lines_per_logger
