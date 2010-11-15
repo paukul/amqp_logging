@@ -5,12 +5,6 @@ module AMQPLogging
   class MetricsAgent
     attr_reader :fields
 
-    at_exit { self.flush_all_instances }
-
-    def self.instances
-      @@instances ||= []
-    end
-
     def initialize
       @default_fields = {
         :host => Socket.gethostname.split('.').first,
@@ -20,7 +14,6 @@ module AMQPLogging
         }
       }
       @logger_types = {}
-      self.class.instances << self
       reset_fields
     end
 
@@ -70,10 +63,6 @@ module AMQPLogging
     end
 
     private
-    def self.flush_all_instances
-      @@instances.each {|i| i.flush }
-    end
-
     def register_logger(logger, type)
       @logger_types[logger] = type
       @fields[:loglines][type] = []
