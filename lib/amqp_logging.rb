@@ -13,6 +13,7 @@ module AMQPLogging
 
   private
   def self.iso_time_with_nanoseconds(t = Time.now)
+  def self.iso_time_with_microseconds(t = Time.now)
     t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec}")
   end
 end
