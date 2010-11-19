@@ -1,4 +1,5 @@
 require 'bunny'
+require 'bunny-ext'
 
 begin
   # ActiveSupport 3.x
@@ -22,4 +23,4 @@ end
 require 'logger'
 require 'amqp_logging/logger'
 require 'amqp_logging/log_device'
-require 'amqp_logging/ext/qrack/client'
+
