@@ -37,7 +37,7 @@ Gem::Specification.new do |s|
 
   s.specification_version     = 3
   s.add_runtime_dependency("bunny",                 ["= 0.6.0"])
-  s.add_runtime_dependency("bunny-ext",             ["= 0.6.0"])
+  s.add_runtime_dependency("bunny-ext",             ["> 0.6.0"])
   s.add_runtime_dependency("activesupport",         [">= 2.3.0"])
   s.add_runtime_dependency("json",                  [">= 1.4.0"])
   s.add_development_dependency("mocha",             [">= 0"])
