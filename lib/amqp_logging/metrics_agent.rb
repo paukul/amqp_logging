@@ -13,7 +13,8 @@ module AMQPLogging
         :pid => Process.pid,
         :loglines => {
           :default => []
-        }
+        },
+        :severity => 0
       }
       @max_lines_per_logger = DEFAULT_MAX_LINES_PER_LOGGER
       @logger_types = {}
@@ -47,6 +48,7 @@ module AMQPLogging
       timestring = AMQPLogging.iso_time_with_microseconds
       logtype = @logger_types[logger]
       lines = @fields[:loglines][logtype]
+      self[:severity] = severity if self[:severity] < severity
       if !@truncated_status[logtype] && lines.size < @max_lines_per_logger
         msg = (message || progname).strip
         lines << [severity, timestring, msg]

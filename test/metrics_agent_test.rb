@@ -93,6 +93,15 @@ module AMQPLogging
       assert_equal some_logline, message
     end
 
+    test "should keep track of the highest log severity" do
+      @proxy.debug "foo"
+      assert_equal Logger::DEBUG, @agent[:severity]
+      @proxy.warn  "bar"
+      assert_equal Logger::WARN, @agent[:severity]
+      @proxy.debug "baz"
+      assert_equal Logger::WARN, @agent[:severity]
+    end
+
     test "should allow to register multiple loggers with different types" do
       other_logger = ::Logger.new('/dev/null')
       @agent.wrap_logger(other_logger, :sql)
