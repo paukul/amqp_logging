@@ -16,7 +16,7 @@ module AMQPLogging
         agent = ActionController::Base.logger.agent
         agent.fields.merge!({
           :env => RAILS_ENV,
-          :response_code    => response.status,
+          :code             => response.status,
           :request_params   => request.request_parameters,
           :request_headers  => request_headers,
           :response_headers => response.headers
