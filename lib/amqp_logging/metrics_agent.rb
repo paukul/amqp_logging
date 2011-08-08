@@ -5,18 +5,16 @@ module AMQPLogging
   class MetricsAgent
     DEFAULT_MAX_LINES_PER_LOGGER = 1000
     attr_reader :fields
-    attr_accessor :max_lines_per_logger
+    attr_accessor :max_lines
 
     def initialize
       @default_fields = {
         :host => Socket.gethostname.split('.').first,
         :pid => Process.pid,
-        :loglines => {
-          :default => []
-        },
+        :loglines => [],
         :severity => 0
       }
-      @max_lines_per_logger = DEFAULT_MAX_LINES_PER_LOGGER
+      @max_lines = DEFAULT_MAX_LINES_PER_LOGGER
       @logger_types = {}
       reset_fields
     end
@@ -46,24 +44,20 @@ module AMQPLogging
 
     def add_logline(severity, message, progname, logger)
       timestring = AMQPLogging.iso_time_with_microseconds
-      logtype = @logger_types[logger]
-      lines = @fields[:loglines][logtype]
       self[:severity] = severity if self[:severity] < severity
-      if !@truncated_status[logtype] && lines.size < @max_lines_per_logger
+      if @fields[:loglines].size < @max_lines
         msg = (message || progname).strip
-        lines << [severity, timestring, msg]
+        @fields[:loglines] << [severity, timestring, msg]
         true
       else
-        msg = "Loglines truncated to #{@max_lines_per_logger} lines (MetricsAgent#max_lines_per_logger)"
-        lines[-1] = [Logger::INFO, timestring, msg]
-        @truncated_status[logtype] = true
+        msg = "Loglines truncated to #{@max_lines} lines (MetricsAgent#max_lines)"
+        @fields[:loglines][-1] = [Logger::INFO, timestring, msg]
         false
       end
     end
 
-    def wrap_logger(logger, type = :default)
+    def wrap_logger(logger)
       agent = self
-      register_logger(logger, type)
       logger.instance_eval do
         @agent = agent
         class << self
@@ -78,18 +72,13 @@ module AMQPLogging
     end
 
     private
-    def register_logger(logger, type)
-      @logger_types[logger] = type
-      @fields[:loglines][type] = []
-    end
 
     def reset_fields
       @fields = {
       }.merge!(@default_fields)
-      @logger_types.values.each {|logtype| @fields[:loglines][logtype] = []}
-      @truncated_status = {}
+      @fields[:loglines] = []
     end
-    
+
     module MetricsAgentSupport
       def self.included(base)
         base.class_eval do

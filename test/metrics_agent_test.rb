@@ -71,15 +71,15 @@ module AMQPLogging
 
     test "should take the loglevel of the logger into account" do
       @logger.level = ::Logger::INFO
-      no_lines_before_logging = @agent[:loglines][:default].size
+      no_lines_before_logging = @agent[:loglines].size
       @logger.debug "something"
-      assert_equal no_lines_before_logging, @agent[:loglines][:default].size
+      assert_equal no_lines_before_logging, @agent[:loglines].size
     end
 
     test "should store the loglines" do
-      assert_equal 0, @agent[:loglines][:default].size
+      assert_equal 0, @agent[:loglines].size
       @proxy.debug("foobar")
-      assert_equal 1, @agent[:loglines][:default].size
+      assert_equal 1, @agent[:loglines].size
     end
 
     test "should store each logline with severity, a timestamp and the message" do
@@ -87,7 +87,7 @@ module AMQPLogging
       @proxy.debug "foo"
       @proxy.warn  "bar"
       @proxy.info  some_logline
-      severity, timestamp, message = @agent[:loglines][:default][2]
+      severity, timestamp, message = @agent[:loglines][2]
       assert_equal Logger::INFO, severity
       assert_nothing_raised { Time.parse(timestamp) }
       assert_equal some_logline, message
@@ -104,46 +104,38 @@ module AMQPLogging
 
     test "should allow to register multiple loggers with different types" do
       other_logger = ::Logger.new('/dev/null')
-      @agent.wrap_logger(other_logger, :sql)
+      @agent.wrap_logger(other_logger)
+      @logger.info("foobar")
       other_logger.info("some fancy stuff here")
-      assert_equal 1, @agent[:loglines][:sql].size
+      assert_equal 2, @agent[:loglines].size
     end
 
     test "should reset the collected loglines when flushed" do
       @proxy.debug "foo"
       @agent.flush
-      assert_equal [], @agent[:loglines][:default]
-    end
-
-    test "should keep loglines fields for the registered loggers after flushing" do
-      other_logger = ::Logger.new('/dev/null')
-      @agent.wrap_logger(other_logger, :sql)
-      other_logger.info "foo"
-      @agent.flush
-
-      assert_equal [], @agent[:loglines][:sql]
+      assert_equal [], @agent[:loglines]
     end
 
     test "should remove leading and trailing newlines from the stored loglines" do
       @proxy.debug "\n\nfoo\n\n"
-      assert_equal "foo", @agent[:loglines][:default][-1][2]
+      assert_equal "foo", @agent[:loglines][-1][2]
     end
 
     test "should have a limit of loglines per logger after which they will get ignored" do
-      @agent.max_lines_per_logger = 2
+      @agent.max_lines = 2
       @logger.debug "foo"
       @logger.debug "bar"
-      no_lines_before = @agent[:loglines][:default].size
+      no_lines_before = @agent[:loglines].size
       @logger.debug "baz"
-      assert_equal no_lines_before, @agent[:loglines][:default].size
+      assert_equal no_lines_before, @agent[:loglines].size
     end
 
     test "should replace the last logged line with a truncation note if the limit of loglines is exceeded" do
-      @agent.max_lines_per_logger = 1
+      @agent.max_lines = 1
       @logger.debug "foo"
-      assert_equal "foo", @agent[:loglines][:default].last[2]
+      assert_equal "foo", @agent[:loglines].last[2]
       @logger.debug "bar"
-      assert_match /truncated/, @agent[:loglines][:default].last[2]
+      assert_match /truncated/, @agent[:loglines].last[2]
     end
   end
 end
